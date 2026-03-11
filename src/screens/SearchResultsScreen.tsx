@@ -14,6 +14,7 @@ import {
   Heart,
   LayoutGrid,
   LayoutList,
+  MapPin,
   Search,
   SlidersHorizontal,
   User,
@@ -136,24 +137,75 @@ export function SearchResultsScreen({
           </View>
         </View>
 
-        {/* Property grid (list view can be added later) */}
-        <View style={styles.propertyGrid}>
-          {filteredProperties.map(prop => (
-            <View
-              key={prop.id}
-              style={[styles.propertyCardWrapper, { width: CARD_WIDTH }]}
-            >
-              <PropertyCard
-                title={prop.title}
-                pricePerMonth={prop.pricePerMonth}
-                rating={prop.rating}
-                location={prop.location}
-                imageSource={prop.imageSource}
-                isFavorite={prop.isFavorite}
-              />
-            </View>
-          ))}
-        </View>
+        {/* Property grid or list */}
+        {viewMode === 'list' ? (
+          <View style={styles.propertyList}>
+            {filteredProperties.map(prop => (
+              <Pressable key={prop.id} style={styles.listCard}>
+                <View style={styles.listCardImageWrap}>
+                  <Image
+                    source={prop.imageSource}
+                    style={styles.listCardImage}
+                    resizeMode="cover"
+                  />
+                  <Pressable style={styles.listFavoriteBtn} hitSlop={8}>
+                    <View
+                      style={[
+                        styles.listHeartCircle,
+                        prop.isFavorite && styles.listHeartCircleActive,
+                      ]}
+                    >
+                      <Heart
+                        size={14}
+                        color={prop.isFavorite ? '#fff' : '#53587a'}
+                        fill={prop.isFavorite ? '#fff' : 'none'}
+                      />
+                    </View>
+                  </Pressable>
+                  <View style={styles.listCategoryTag}>
+                    <Text style={styles.listCategoryText}>{prop.category}</Text>
+                  </View>
+                </View>
+                <View style={styles.listCardContent}>
+                  <Text style={styles.listCardTitle} numberOfLines={1}>
+                    {prop.title}
+                  </Text>
+                  <View style={styles.listMetaColumn}>
+                    <Text style={styles.listRating}>★ {prop.rating}</Text>
+                    <View style={styles.listLocationRow}>
+                      <MapPin size={10} color="#53587a" />
+                      <Text style={styles.listLocation} numberOfLines={1}>
+                        {prop.location}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.listPrice}>
+                    $ {prop.pricePerMonth}
+                    <Text style={styles.listPricePeriod}>/month</Text>
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.propertyGrid}>
+            {filteredProperties.map(prop => (
+              <View
+                key={prop.id}
+                style={[styles.propertyCardWrapper, { width: CARD_WIDTH }]}
+              >
+                <PropertyCard
+                  title={prop.title}
+                  pricePerMonth={prop.pricePerMonth}
+                  rating={prop.rating}
+                  location={prop.location}
+                  imageSource={prop.imageSource}
+                  isFavorite={prop.isFavorite}
+                />
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom navbar - Search active */}
@@ -274,6 +326,112 @@ const styles = StyleSheet.create({
   },
   propertyCardWrapper: {
     maxWidth: CARD_WIDTH,
+  },
+  propertyList: {
+    gap: 12,
+  },
+  listCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    overflow: 'hidden',
+    minHeight: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  listCardImageWrap: {
+    width: '42%',
+    aspectRatio: 1.1,
+    backgroundColor: '#e8e8e8',
+    overflow: 'hidden',
+  },
+  listCardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  listFavoriteBtn: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  listHeartCircle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+  listHeartCircleActive: {
+    backgroundColor: '#8bc83f',
+  },
+  listCategoryTag: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: 'rgba(35,79,104,0.85)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  listCategoryText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  listCardContent: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    justifyContent: 'space-between',
+  },
+  listCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#252b5c',
+    letterSpacing: 0.3,
+    marginBottom: 5,
+  },
+  listMetaColumn: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  listRating: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#53587a',
+  },
+  listLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    minWidth: 0,
+  },
+  listLocation: {
+    fontSize: 11,
+    color: '#53587a',
+    flex: 1,
+  },
+  listPrice: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#252b5c',
+  },
+  listPricePeriod: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#53587a',
   },
   bottomBar: {
     position: 'absolute',
