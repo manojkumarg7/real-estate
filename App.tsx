@@ -10,6 +10,7 @@ import { Dimensions, Platform, StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { HomeScreen } from './src/screens/HomeScreen';
+import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 
 // So SafeAreaProvider shows content immediately instead of waiting for native insets (avoids black screen).
@@ -19,8 +20,10 @@ const INITIAL_METRICS = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
+type AppScreen = 'splash' | 'home' | 'search';
+
 function App() {
-  const [screen, setScreen] = useState<'splash' | 'home'>('splash');
+  const [screen, setScreen] = useState<AppScreen>('splash');
 
   return (
     <ErrorBoundary>
@@ -32,8 +35,13 @@ function App() {
           />
           {screen === 'splash' ? (
             <SplashScreen onLetsStart={() => setScreen('home')} />
+          ) : screen === 'search' ? (
+            <SearchResultsScreen
+              onBack={() => setScreen('home')}
+              onNavigateToHome={() => setScreen('home')}
+            />
           ) : (
-            <HomeScreen />
+            <HomeScreen onNavigateToSearch={() => setScreen('search')} />
           )}
         </SafeAreaProvider>
       </View>
