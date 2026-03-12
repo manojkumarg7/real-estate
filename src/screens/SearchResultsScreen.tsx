@@ -40,6 +40,7 @@ export function SearchResultsScreen({
   onToggleFavorite,
   onBack,
   onNavigateToHome,
+  onNavigateToMap,
   onNavigateToWishlist,
   onNavigateToPropertyDetail,
   onNavigateToProfile,
@@ -48,6 +49,7 @@ export function SearchResultsScreen({
   onToggleFavorite: (id: string) => void;
   onBack: () => void;
   onNavigateToHome: () => void;
+  onNavigateToMap?: () => void;
   onNavigateToWishlist: () => void;
   onNavigateToPropertyDetail?: (id: string) => void;
   onNavigateToProfile?: () => void;
@@ -200,12 +202,12 @@ export function SearchResultsScreen({
                     <Text style={styles.filterTitle}>Filter</Text>
                     <Pressable
                       style={styles.filterResetBtn}
-                    onPress={() => {
-                      setFilterPropertyType('All');
-                      setFilterLocation('Semarang');
-                      setAppliedPropertyType('All');
-                      setAppliedLocation('');
-                    }}
+                      onPress={() => {
+                        setFilterPropertyType('All');
+                        setFilterLocation('Semarang');
+                        setAppliedPropertyType('All');
+                        setAppliedLocation('');
+                      }}
                     >
                       <Text style={styles.filterResetText}>Reset</Text>
                     </Pressable>
@@ -259,7 +261,13 @@ export function SearchResultsScreen({
                         />
                         <Search size={20} color="#53587a" />
                       </View>
-                      <View style={styles.filterMapPlaceholder}>
+                      <Pressable
+                        style={styles.filterMapPlaceholder}
+                        onPress={() => {
+                          setFilterVisible(false);
+                          onNavigateToMap?.();
+                        }}
+                      >
                         <Image
                           source={require('../assets/estate-img-1.png')}
                           style={styles.filterMapImage}
@@ -268,19 +276,19 @@ export function SearchResultsScreen({
                         <View style={styles.filterMapOverlay}>
                           <MapPin size={32} color="#53587a" />
                           <Text style={styles.filterMapPlaceholderText}>
-                            Map placeholder
+                            Tap to open map
                           </Text>
                         </View>
-                      </View>
+                      </Pressable>
                     </View>
-                  <Pressable
-                    style={styles.filterApplyBtn}
-                    onPress={() => {
-                      setAppliedPropertyType(filterPropertyType);
-                      setAppliedLocation(filterLocation.trim());
-                      setFilterVisible(false);
-                    }}
-                  >
+                    <Pressable
+                      style={styles.filterApplyBtn}
+                      onPress={() => {
+                        setAppliedPropertyType(filterPropertyType);
+                        setAppliedLocation(filterLocation.trim());
+                        setFilterVisible(false);
+                      }}
+                    >
                       <Text style={styles.filterApplyText}>Apply Filter</Text>
                     </Pressable>
                   </View>
@@ -291,7 +299,7 @@ export function SearchResultsScreen({
         </Modal>
 
         {/* Property grid or list */}
-            {viewMode === 'list' ? (
+        {viewMode === 'list' ? (
           <View style={styles.propertyList}>
             {filteredProperties.map(prop => (
               <Pressable

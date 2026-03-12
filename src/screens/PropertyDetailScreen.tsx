@@ -39,8 +39,16 @@ function getDetailExtras(propertyId: string) {
     costOfLivingNote: 'From utility bill over food to loan.',
     reviewCount: '100+',
     reviews: [
-      { name: 'Kat Miles', rating: 5, text: 'Great place to live. Highly recommend!' },
-      { name: 'Ray Swanson', rating: 5, text: 'Loved the neighborhood and the view.' },
+      {
+        name: 'Kat Miles',
+        rating: 5,
+        text: 'Great place to live. Highly recommend!',
+      },
+      {
+        name: 'Ray Swanson',
+        rating: 5,
+        text: 'Loved the neighborhood and the view.',
+      },
     ],
   };
 }
@@ -76,7 +84,10 @@ export function PropertyDetailScreen({
 
   const extras = getDetailExtras(property.id);
   const isFavorite = favoriteIds.includes(property.id);
-  const nearbyProperties = PROPERTIES.filter(p => p.id !== property.id).slice(0, 5);
+  const nearbyProperties = PROPERTIES.filter(p => p.id !== property.id).slice(
+    0,
+    5,
+  );
   const cardWidth = (SCREEN_WIDTH - 44 - 10) / 2;
 
   return (
@@ -98,7 +109,10 @@ export function PropertyDetailScreen({
               <ChevronLeft size={24} color="#252b5c" />
             </Pressable>
             <Pressable
-              style={[styles.favoriteButton, isFavorite && styles.favoriteButtonActive]}
+              style={[
+                styles.favoriteButton,
+                isFavorite && styles.favoriteButtonActive,
+              ]}
               onPress={() => onToggleFavorite(property.id)}
             >
               <Heart
@@ -167,11 +181,15 @@ export function PropertyDetailScreen({
         <View style={styles.featureBadges}>
           <View style={styles.featureBadge}>
             <BedDouble size={16} color="#53587a" />
-            <Text style={styles.featureBadgeText}>{extras.bedrooms} Bedrooms</Text>
+            <Text style={styles.featureBadgeText}>
+              {extras.bedrooms} Bedrooms
+            </Text>
           </View>
           <View style={styles.featureBadge}>
             <Bath size={16} color="#53587a" />
-            <Text style={styles.featureBadgeText}>{extras.bathrooms} Bathrooms</Text>
+            <Text style={styles.featureBadgeText}>
+              {extras.bathrooms} Bathrooms
+            </Text>
           </View>
           <View style={styles.featureBadge}>
             <LayoutGrid size={16} color="#53587a" />
@@ -192,9 +210,15 @@ export function PropertyDetailScreen({
             <ChevronDown size={18} color="#53587a" />
           </Pressable>
           <View style={styles.filterChips}>
-            <Pressable style={styles.filterChip}><Text style={styles.filterChipText}>Near by</Text></Pressable>
-            <Pressable style={styles.filterChip}><Text style={styles.filterChipText}>Public facilities</Text></Pressable>
-            <Pressable style={styles.filterChip}><Text style={styles.filterChipText}>Schools</Text></Pressable>
+            <Pressable style={styles.filterChip}>
+              <Text style={styles.filterChipText}>Near by</Text>
+            </Pressable>
+            <Pressable style={styles.filterChip}>
+              <Text style={styles.filterChipText}>Public facilities</Text>
+            </Pressable>
+            <Pressable style={styles.filterChip}>
+              <Text style={styles.filterChipText}>Schools</Text>
+            </Pressable>
           </View>
           <View style={styles.mapPlaceholder}>
             <Image
@@ -216,7 +240,9 @@ export function PropertyDetailScreen({
             <Text style={styles.viewAllLink}>View all</Text>
           </View>
           <View style={styles.costCard}>
-            <Text style={styles.costAmount}>${extras.costOfLivingPerMonth} / month</Text>
+            <Text style={styles.costAmount}>
+              ${extras.costOfLivingPerMonth} / month
+            </Text>
             <Text style={styles.costNote}>{extras.costOfLivingNote}</Text>
           </View>
         </View>
@@ -239,11 +265,16 @@ export function PropertyDetailScreen({
               <View style={[styles.reviewAvatar, styles.reviewAvatar2]} />
               <View style={[styles.reviewAvatar, styles.reviewAvatar3]} />
             </View>
-            <Text style={styles.reviewCount}>Based on {extras.reviewCount} Reviews</Text>
+            <Text style={styles.reviewCount}>
+              Based on {extras.reviewCount} Reviews
+            </Text>
           </View>
           {extras.reviews.map((r, i) => (
             <View key={i} style={styles.reviewCard}>
-              <Image source={require('../assets/user-profile.jpg')} style={styles.reviewerAvatar} />
+              <Image
+                source={require('../assets/user-profile.jpg')}
+                style={styles.reviewerAvatar}
+              />
               <View style={styles.reviewBody}>
                 <Text style={styles.reviewerName}>{r.name}</Text>
                 <View style={styles.reviewStarsSmall}>
@@ -368,7 +399,12 @@ const styles = StyleSheet.create({
   },
   galleryThumbMoreText: { fontSize: 12, fontWeight: '700', color: '#fff' },
   section: { paddingHorizontal: 22, paddingTop: 24 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
   propertyTitle: { fontSize: 22, fontWeight: '700', color: '#252b5c', flex: 1 },
   priceBlock: { alignItems: 'flex-end' },
   priceAmount: { fontSize: 20, fontWeight: '700', color: '#252b5c' },
@@ -436,8 +472,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f4f8',
   },
   featureBadgeText: { fontSize: 13, fontWeight: '600', color: '#53587a' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#252b5c', marginBottom: 14 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#252b5c',
+    marginBottom: 14,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
   viewAllLink: { fontSize: 14, fontWeight: '600', color: '#8bc83f' },
   addressRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   addressIcon: { width: 18, height: 18, marginRight: 10 },
@@ -460,8 +506,17 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   mapImage: { width: '100%', height: '100%', opacity: 0.6 },
-  mapOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  viewAllMap: { fontSize: 14, fontWeight: '600', color: '#8bc83f', marginTop: 10 },
+  mapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewAllMap: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8bc83f',
+    marginTop: 10,
+  },
   costCard: {
     backgroundColor: '#f5f4f8',
     borderRadius: 16,
@@ -482,7 +537,13 @@ const styles = StyleSheet.create({
   reviewScore: { fontSize: 24, fontWeight: '700', color: '#252b5c' },
   reviewStars: { flexDirection: 'row', gap: 4, marginTop: 8 },
   reviewAvatars: { flexDirection: 'row', marginTop: 8 },
-  reviewAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#c0c0c0', marginRight: -8 },
+  reviewAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#c0c0c0',
+    marginRight: -8,
+  },
   reviewAvatar2: { backgroundColor: '#a0a0a0' },
   reviewAvatar3: { backgroundColor: '#808080' },
   reviewCount: { fontSize: 12, color: '#53587a', marginTop: 8 },

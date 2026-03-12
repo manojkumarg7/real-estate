@@ -30,5 +30,7 @@ target 'riseRealEstate' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    # Required for @maplibre/maplibre-react-native native module registration
+    $MLRN.post_install(installer) if defined?($MLRN)
   end
 end

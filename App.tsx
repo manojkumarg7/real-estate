@@ -5,8 +5,8 @@
  * @format
  */
 
-import React, { useState } from 'react';
-import { Dimensions, StatusBar, View } from 'react-native';
+import React, { Suspense, useState } from 'react';
+import { ActivityIndicator, Dimensions, StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -16,6 +16,11 @@ import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { WishlistScreen } from './src/screens/WishlistScreen';
 
+// Lazy-load MapScreen so MapLibre is only loaded when user opens the map (avoids console errors on app start when native module is not linked)
+const MapScreen = React.lazy(() =>
+  import('./src/screens/MapScreen').then(m => ({ default: m.MapScreen })),
+);
+
 // So SafeAreaProvider shows content immediately instead of waiting for native insets (avoids black screen).
 const { width, height } = Dimensions.get('window');
 const INITIAL_METRICS = {
@@ -23,7 +28,7 @@ const INITIAL_METRICS = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-type AppScreen = 'splash' | 'home' | 'search' | 'wishlist' | 'property-detail' | 'profile';
+type AppScreen = 'splash' | 'home' | 'search' | 'map' | 'wishlist' | 'property-detail' | 'profile';
 
 // Initial favorites matching PROPERTIES that have isFavorite: true
 const INITIAL_FAVORITE_IDS = ['1', '6', '8', '11', '15', '18', '21', '24'];
@@ -73,10 +78,29 @@ function AppContent({
         onToggleFavorite={toggleFavorite}
         onBack={() => setScreen('home')}
         onNavigateToHome={() => setScreen('home')}
+        onNavigateToMap={() => setScreen('map')}
         onNavigateToWishlist={() => setScreen('wishlist')}
         onNavigateToPropertyDetail={navigateToPropertyDetail}
         onNavigateToProfile={() => setScreen('profile')}
       />
+    );
+  }
+  if (screen === 'map') {
+    return (
+      <Suspense
+        fallback={
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#53587a" />
+          </View>
+        }
+      >
+        <MapScreen
+          onBack={() => setScreen('search')}
+          onPropertySelect={id => {
+            if (id !== 'default-property') navigateToPropertyDetail(id);
+          }}
+        />
+      </Suspense>
     );
   }
   if (screen === 'wishlist') {
