@@ -32,7 +32,39 @@ const isMapLibreAvailable = (): boolean =>
 // ---------------------------------------------------------------------------
 const BANGALORE_CENTER: GeoJSON.Position = [77.5946, 12.9716];
 const INITIAL_ZOOM = 13;
-const MAP_STYLE_URL = 'https://demotiles.maplibre.org/style.json';
+
+// Map style: neutral background + OpenStreetMap raster tiles (streets, places, POIs visible)
+const MAP_STYLE: object = {
+  version: 8,
+  name: 'OSM Streets',
+  sources: {
+    osm: {
+      type: 'raster',
+      tiles: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    },
+  },
+  layers: [
+    {
+      id: 'background',
+      type: 'background',
+      paint: { 'background-color': '#f0f0f0' },
+    },
+    {
+      id: 'osm-raster',
+      type: 'raster',
+      source: 'osm',
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -110,7 +142,7 @@ export function MapScreen({
       {/* Full-screen map with zoom and pan enabled by default */}
       <MapLibre.MapView
         style={styles.map}
-        mapStyle={MAP_STYLE_URL}
+        mapStyle={MAP_STYLE}
         zoomEnabled
         scrollEnabled
         pitchEnabled
@@ -138,14 +170,19 @@ export function MapScreen({
             id={id}
             coordinate={coordinate}
             title={title}
+            selected={markers.length === 1}
             onSelected={() => onPropertySelect?.(id)}
           >
             <View style={styles.markerContainer}>
               <View style={styles.markerPin}>
-                <MapPin size={24} color="#fff" />
+                <MapPin size={22} color="#fff" />
               </View>
             </View>
-            <MapLibre.Callout title={title ?? 'Property'} />
+            <MapLibre.Callout
+              title={title ?? 'Property'}
+              textStyle={styles.calloutText}
+              contentStyle={styles.calloutContent}
+            />
           </MapLibre.PointAnnotation>
         ))}
       </MapLibre.MapView>
@@ -229,13 +266,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   markerPin: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#53587a',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#c53030',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  calloutContent: {
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 120,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.12)',
+  },
+  calloutText: {
+    color: '#252b5c',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

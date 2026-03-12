@@ -59,12 +59,14 @@ export function PropertyDetailScreen({
   onToggleFavorite,
   onBack,
   onNavigateToPropertyDetail,
+  onNavigateToMap,
 }: {
   propertyId: string;
   favoriteIds: string[];
   onToggleFavorite: (id: string) => void;
   onBack: () => void;
   onNavigateToPropertyDetail?: (id: string) => void;
+  onNavigateToMap?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const property = PROPERTIES.find(p => p.id === propertyId);
@@ -220,7 +222,10 @@ export function PropertyDetailScreen({
               <Text style={styles.filterChipText}>Schools</Text>
             </Pressable>
           </View>
-          <View style={styles.mapPlaceholder}>
+          <Pressable
+            style={styles.mapPlaceholder}
+            onPress={() => onNavigateToMap?.()}
+          >
             <Image
               source={property.imageSource}
               style={styles.mapImage}
@@ -229,8 +234,10 @@ export function PropertyDetailScreen({
             <View style={styles.mapOverlay}>
               <MapPin size={28} color="#252b5c" />
             </View>
-          </View>
-          <Text style={styles.viewAllMap}>View all map</Text>
+          </Pressable>
+          <Pressable onPress={() => onNavigateToMap?.()}>
+            <Text style={styles.viewAllMap}>View all map</Text>
+          </Pressable>
         </View>
 
         {/* Cost of Living */}

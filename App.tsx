@@ -9,6 +9,7 @@ import React, { Suspense, useState } from 'react';
 import { ActivityIndicator, Dimensions, StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { PROPERTIES } from './src/data/properties';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { PropertyDetailScreen } from './src/screens/PropertyDetailScreen';
 import { ProfileScreen } from './src/screens/ProfileScreen';
@@ -30,6 +31,9 @@ const INITIAL_METRICS = {
 
 type AppScreen = 'splash' | 'home' | 'search' | 'map' | 'wishlist' | 'property-detail' | 'profile';
 
+// Bangalore center [lng, lat] for map marker when opening from property detail (property data has no coords yet)
+const BANGALORE_CENTER: [number, number] = [77.5946, 12.9716];
+
 // Initial favorites matching PROPERTIES that have isFavorite: true
 const INITIAL_FAVORITE_IDS = ['1', '6', '8', '11', '15', '18', '21', '24'];
 
@@ -39,6 +43,8 @@ type AppContentProps = {
   favoriteIds: string[];
   setScreen: (s: AppScreen) => void;
   setSelectedPropertyId: (id: string | null) => void;
+  setMapReturnScreen: (s: 'search' | 'property-detail' | null) => void;
+  mapReturnScreen: 'search' | 'property-detail' | null;
   toggleFavorite: (id: string) => void;
   navigateToPropertyDetail: (id: string) => void;
 };
@@ -49,6 +55,8 @@ function AppContent({
   favoriteIds,
   setScreen,
   setSelectedPropertyId,
+  setMapReturnScreen,
+  mapReturnScreen,
   toggleFavorite,
   navigateToPropertyDetail,
 }: AppContentProps) {
@@ -68,6 +76,10 @@ function AppContent({
           setScreen('home');
         }}
         onNavigateToPropertyDetail={navigateToPropertyDetail}
+        onNavigateToMap={() => {
+          setMapReturnScreen('property-detail');
+          setScreen('map');
+        }}
       />
     );
   }
@@ -78,7 +90,10 @@ function AppContent({
         onToggleFavorite={toggleFavorite}
         onBack={() => setScreen('home')}
         onNavigateToHome={() => setScreen('home')}
-        onNavigateToMap={() => setScreen('map')}
+        onNavigateToMap={() => {
+          setMapReturnScreen('search');
+          setScreen('map');
+        }}
         onNavigateToWishlist={() => setScreen('wishlist')}
         onNavigateToPropertyDetail={navigateToPropertyDetail}
         onNavigateToProfile={() => setScreen('profile')}
@@ -86,6 +101,16 @@ function AppContent({
     );
   }
   if (screen === 'map') {
+    const propertyCoordinates =
+      mapReturnScreen === 'property-detail' && selectedPropertyId
+        ? (() => {
+            const p = PROPERTIES.find(pr => pr.id === selectedPropertyId);
+            return p
+              ? [{ id: p.id, coordinate: BANGALORE_CENTER, title: p.title }]
+              : undefined;
+          })()
+        : undefined;
+
     return (
       <Suspense
         fallback={
@@ -95,7 +120,11 @@ function AppContent({
         }
       >
         <MapScreen
-          onBack={() => setScreen('search')}
+          propertyCoordinates={propertyCoordinates}
+          onBack={() => {
+            setScreen(mapReturnScreen ?? 'search');
+            setMapReturnScreen(null);
+          }}
           onPropertySelect={id => {
             if (id !== 'default-property') navigateToPropertyDetail(id);
           }}
@@ -143,6 +172,7 @@ function App() {
   const [screen, setScreen] = useState<AppScreen>('splash');
   const [favoriteIds, setFavoriteIds] = useState<string[]>(INITIAL_FAVORITE_IDS);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [mapReturnScreen, setMapReturnScreen] = useState<'search' | 'property-detail' | null>(null);
 
   const toggleFavorite = (id: string) => {
     setFavoriteIds(prev =>
@@ -169,6 +199,8 @@ function App() {
             favoriteIds={favoriteIds}
             setScreen={setScreen}
             setSelectedPropertyId={setSelectedPropertyId}
+            setMapReturnScreen={setMapReturnScreen}
+            mapReturnScreen={mapReturnScreen}
             toggleFavorite={toggleFavorite}
             navigateToPropertyDetail={navigateToPropertyDetail}
           />
