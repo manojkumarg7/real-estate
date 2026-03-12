@@ -6,12 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { Dimensions, Platform, StatusBar, View } from 'react-native';
+import { Dimensions, StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { HomeScreen } from './src/screens/HomeScreen';
+import { PropertyDetailScreen } from './src/screens/PropertyDetailScreen';
 import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
+import { WishlistScreen } from './src/screens/WishlistScreen';
 
 // So SafeAreaProvider shows content immediately instead of waiting for native insets (avoids black screen).
 const { width, height } = Dimensions.get('window');
@@ -20,10 +22,99 @@ const INITIAL_METRICS = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-type AppScreen = 'splash' | 'home' | 'search';
+type AppScreen = 'splash' | 'home' | 'search' | 'wishlist' | 'property-detail';
+
+// Initial favorites matching PROPERTIES that have isFavorite: true
+const INITIAL_FAVORITE_IDS = ['1', '6', '8', '11', '15', '18', '21', '24'];
+
+type AppContentProps = {
+  screen: AppScreen;
+  selectedPropertyId: string | null;
+  favoriteIds: string[];
+  setScreen: (s: AppScreen) => void;
+  setSelectedPropertyId: (id: string | null) => void;
+  toggleFavorite: (id: string) => void;
+  navigateToPropertyDetail: (id: string) => void;
+};
+
+function AppContent({
+  screen,
+  selectedPropertyId,
+  favoriteIds,
+  setScreen,
+  setSelectedPropertyId,
+  toggleFavorite,
+  navigateToPropertyDetail,
+}: AppContentProps) {
+  const showPropertyDetail = screen === 'property-detail' && selectedPropertyId != null;
+
+  if (screen === 'splash') {
+    return <SplashScreen onLetsStart={() => setScreen('home')} />;
+  }
+  if (showPropertyDetail && selectedPropertyId) {
+    return (
+      <PropertyDetailScreen
+        propertyId={selectedPropertyId}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
+        onBack={() => {
+          setSelectedPropertyId(null);
+          setScreen('home');
+        }}
+        onNavigateToPropertyDetail={navigateToPropertyDetail}
+      />
+    );
+  }
+  if (screen === 'search') {
+    return (
+      <SearchResultsScreen
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
+        onBack={() => setScreen('home')}
+        onNavigateToHome={() => setScreen('home')}
+        onNavigateToWishlist={() => setScreen('wishlist')}
+        onNavigateToPropertyDetail={navigateToPropertyDetail}
+      />
+    );
+  }
+  if (screen === 'wishlist') {
+    return (
+      <WishlistScreen
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
+        onBack={() => setScreen('home')}
+        onNavigateToHome={() => setScreen('home')}
+        onNavigateToSearch={() => setScreen('search')}
+        onNavigateToPropertyDetail={navigateToPropertyDetail}
+      />
+    );
+  }
+  return (
+    <HomeScreen
+      favoriteIds={favoriteIds}
+      onToggleFavorite={toggleFavorite}
+      onNavigateToSearch={() => setScreen('search')}
+      onNavigateToWishlist={() => setScreen('wishlist')}
+      onNavigateToPropertyDetail={navigateToPropertyDetail}
+    />
+  );
+}
 
 function App() {
   const [screen, setScreen] = useState<AppScreen>('splash');
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(INITIAL_FAVORITE_IDS);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+
+  const toggleFavorite = (id: string) => {
+    setFavoriteIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id],
+    );
+  };
+
+  const navigateToPropertyDetail = (id: string) => {
+    setSelectedPropertyId(id);
+    setScreen('property-detail');
+  };
 
   return (
     <ErrorBoundary>
@@ -33,16 +124,15 @@ function App() {
             barStyle={screen === 'splash' ? 'light-content' : 'dark-content'}
             backgroundColor={screen === 'splash' ? '#234f68' : '#fff'}
           />
-          {screen === 'splash' ? (
-            <SplashScreen onLetsStart={() => setScreen('home')} />
-          ) : screen === 'search' ? (
-            <SearchResultsScreen
-              onBack={() => setScreen('home')}
-              onNavigateToHome={() => setScreen('home')}
-            />
-          ) : (
-            <HomeScreen onNavigateToSearch={() => setScreen('search')} />
-          )}
+          <AppContent
+            screen={screen}
+            selectedPropertyId={selectedPropertyId}
+            favoriteIds={favoriteIds}
+            setScreen={setScreen}
+            setSelectedPropertyId={setSelectedPropertyId}
+            toggleFavorite={toggleFavorite}
+            navigateToPropertyDetail={navigateToPropertyDetail}
+          />
         </SafeAreaProvider>
       </View>
     </ErrorBoundary>

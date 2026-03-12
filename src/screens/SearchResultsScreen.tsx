@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {
@@ -28,30 +30,60 @@ const H_PADDING = 44;
 const CARD_GAP = 10;
 const CARD_WIDTH = (SCREEN_WIDTH - H_PADDING - CARD_GAP) / 2;
 
+const PROPERTY_TYPES = ['All', 'House', 'Apartment', 'Villa'] as const;
+type PropertyTypeFilter = (typeof PROPERTY_TYPES)[number];
+
 type ViewMode = 'grid' | 'list' | 'filter';
 
 export function SearchResultsScreen({
+  favoriteIds,
+  onToggleFavorite,
   onBack,
   onNavigateToHome,
+  onNavigateToWishlist,
+  onNavigateToPropertyDetail,
 }: {
+  favoriteIds: string[];
+  onToggleFavorite: (id: string) => void;
   onBack: () => void;
   onNavigateToHome: () => void;
+  onNavigateToWishlist: () => void;
+  onNavigateToPropertyDetail?: (id: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterPropertyType, setFilterPropertyType] =
+    useState<PropertyTypeFilter>('All');
+  const [filterLocation, setFilterLocation] = useState('Semarang');
+  // Applied filter: only these affect the list until user taps "Apply Filter"
+  const [appliedPropertyType, setAppliedPropertyType] =
+    useState<PropertyTypeFilter>('All');
+  const [appliedLocation, setAppliedLocation] = useState('');
   const paddingTop = insets?.top ?? 0;
   const paddingBottom = insets?.bottom ?? 0;
 
   const searchLower = searchQuery.trim().toLowerCase();
-  const filteredProperties = searchLower
+  let filteredProperties = searchLower
     ? PROPERTIES.filter(
         p =>
           p.title.toLowerCase().includes(searchLower) ||
           p.location.toLowerCase().includes(searchLower) ||
           p.category.toLowerCase().includes(searchLower),
       )
-    : PROPERTIES;
+    : [...PROPERTIES];
+  if (appliedPropertyType !== 'All') {
+    filteredProperties = filteredProperties.filter(
+      p => p.category === appliedPropertyType,
+    );
+  }
+  if (appliedLocation.trim()) {
+    const locLower = appliedLocation.trim().toLowerCase();
+    filteredProperties = filteredProperties.filter(p =>
+      p.location.toLowerCase().includes(locLower),
+    );
+  }
 
   const count = filteredProperties.length;
 
@@ -125,40 +157,170 @@ export function SearchResultsScreen({
             <Pressable
               style={[
                 styles.viewToggle,
-                viewMode === 'filter' && styles.viewToggleActive,
+                filterVisible && styles.viewToggleActive,
               ]}
-              onPress={() => setViewMode('filter')}
+              onPress={() => {
+                setFilterPropertyType(appliedPropertyType);
+                setFilterLocation(appliedLocation.trim() || 'Semarang');
+                setFilterVisible(true);
+              }}
             >
               <SlidersHorizontal
                 size={18}
-                color={viewMode === 'filter' ? '#252b5c' : '#a1a5c1'}
+                color={filterVisible ? '#252b5c' : '#a1a5c1'}
               />
             </Pressable>
           </View>
         </View>
 
+        {/* Filter bottom overlay */}
+        <Modal
+          visible={filterVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setFilterVisible(false)}
+        >
+          <View style={styles.filterModalContainer}>
+            <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
+              <View style={styles.filterBackdrop} />
+            </TouchableWithoutFeedback>
+            <View
+              style={[
+                styles.filterSheet,
+                { paddingBottom: paddingBottom + 24 },
+              ]}
+              onStartShouldSetResponder={() => true}
+            >
+              <TouchableWithoutFeedback>
+                <View>
+                  <View style={styles.filterHandle} />
+                  <View style={styles.filterHeader}>
+                    <Text style={styles.filterTitle}>Filter</Text>
+                    <Pressable
+                      style={styles.filterResetBtn}
+                    onPress={() => {
+                      setFilterPropertyType('All');
+                      setFilterLocation('Semarang');
+                      setAppliedPropertyType('All');
+                      setAppliedLocation('');
+                    }}
+                    >
+                      <Text style={styles.filterResetText}>Reset</Text>
+                    </Pressable>
+                  </View>
+                  <View style={styles.filterBody}>
+                    <View style={styles.filterSection}>
+                      <View style={styles.filterSectionTitleRow}>
+                        <Text style={styles.filterSectionTitle}>
+                          Property type
+                        </Text>
+                        <View style={styles.filterRequiredDot} />
+                      </View>
+                      <View style={styles.filterChipsRow}>
+                        {PROPERTY_TYPES.map(type => (
+                          <Pressable
+                            key={type}
+                            style={[
+                              styles.filterChip,
+                              filterPropertyType === type &&
+                                styles.filterChipActive,
+                            ]}
+                            onPress={() => setFilterPropertyType(type)}
+                          >
+                            <Text
+                              style={[
+                                styles.filterChipText,
+                                filterPropertyType === type &&
+                                  styles.filterChipTextActive,
+                              ]}
+                            >
+                              {type}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                    <View style={styles.filterSection}>
+                      <Text style={styles.filterSectionTitle}>Location</Text>
+                      <View style={styles.filterLocationInput}>
+                        <MapPin
+                          size={20}
+                          color="#252b5c"
+                          style={styles.filterLocationIcon}
+                        />
+                        <TextInput
+                          style={styles.filterLocationTextInput}
+                          placeholder="Search location"
+                          placeholderTextColor="#a1a5c1"
+                          value={filterLocation}
+                          onChangeText={setFilterLocation}
+                        />
+                        <Search size={20} color="#53587a" />
+                      </View>
+                      <View style={styles.filterMapPlaceholder}>
+                        <Image
+                          source={require('../assets/estate-img-1.png')}
+                          style={styles.filterMapImage}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.filterMapOverlay}>
+                          <MapPin size={32} color="#53587a" />
+                          <Text style={styles.filterMapPlaceholderText}>
+                            Map placeholder
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  <Pressable
+                    style={styles.filterApplyBtn}
+                    onPress={() => {
+                      setAppliedPropertyType(filterPropertyType);
+                      setAppliedLocation(filterLocation.trim());
+                      setFilterVisible(false);
+                    }}
+                  >
+                      <Text style={styles.filterApplyText}>Apply Filter</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </Modal>
+
         {/* Property grid or list */}
-        {viewMode === 'list' ? (
+            {viewMode === 'list' ? (
           <View style={styles.propertyList}>
             {filteredProperties.map(prop => (
-              <Pressable key={prop.id} style={styles.listCard}>
+              <Pressable
+                key={prop.id}
+                style={styles.listCard}
+                onPress={() => onNavigateToPropertyDetail?.(prop.id)}
+              >
                 <View style={styles.listCardImageWrap}>
                   <Image
                     source={prop.imageSource}
                     style={styles.listCardImage}
                     resizeMode="cover"
                   />
-                  <Pressable style={styles.listFavoriteBtn} hitSlop={8}>
+                  <Pressable
+                    style={styles.listFavoriteBtn}
+                    hitSlop={8}
+                    onPress={() => onToggleFavorite(prop.id)}
+                  >
                     <View
                       style={[
                         styles.listHeartCircle,
-                        prop.isFavorite && styles.listHeartCircleActive,
+                        favoriteIds.includes(prop.id) &&
+                          styles.listHeartCircleActive,
                       ]}
                     >
                       <Heart
                         size={14}
-                        color={prop.isFavorite ? '#fff' : '#53587a'}
-                        fill={prop.isFavorite ? '#fff' : 'none'}
+                        color={
+                          favoriteIds.includes(prop.id) ? '#fff' : '#53587a'
+                        }
+                        fill={favoriteIds.includes(prop.id) ? '#fff' : 'none'}
                       />
                     </View>
                   </Pressable>
@@ -200,7 +362,9 @@ export function SearchResultsScreen({
                   rating={prop.rating}
                   location={prop.location}
                   imageSource={prop.imageSource}
-                  isFavorite={prop.isFavorite}
+                  isFavorite={favoriteIds.includes(prop.id)}
+                  onFavoritePress={() => onToggleFavorite(prop.id)}
+                  onPress={() => onNavigateToPropertyDetail?.(prop.id)}
                 />
               </View>
             ))}
@@ -218,7 +382,7 @@ export function SearchResultsScreen({
             <Search size={24} color="#8bc83f" style={styles.icon24} />
             <View style={styles.tabDot} />
           </Pressable>
-          <Pressable style={styles.tab}>
+          <Pressable style={styles.tab} onPress={onNavigateToWishlist}>
             <Heart size={24} color="#252b5c" style={styles.icon24} />
           </Pressable>
           <Pressable style={styles.tab}>
@@ -461,4 +625,153 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   icon24: { width: 24, height: 24 },
+  // Filter overlay
+  filterModalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
+  },
+  filterBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  filterSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+  },
+  filterHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#e0e0e0',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  filterTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#252b5c',
+  },
+  filterResetBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    backgroundColor: '#252b5c',
+  },
+  filterResetText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  filterBody: {
+    paddingBottom: 16,
+  },
+  filterSection: {
+    marginBottom: 24,
+  },
+  filterSectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  filterSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#252b5c',
+  },
+  filterRequiredDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#e53935',
+    marginLeft: 4,
+  },
+  filterChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  filterChip: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#f5f4f8',
+  },
+  filterChipActive: {
+    backgroundColor: '#252b5c',
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#53587a',
+  },
+  filterChipTextActive: {
+    color: '#fff',
+  },
+  filterLocationInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    backgroundColor: '#f5f4f8',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    gap: 10,
+  },
+  filterLocationIcon: {
+    width: 20,
+    height: 20,
+  },
+  filterLocationTextInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#252b5c',
+    paddingVertical: 0,
+  },
+  filterMapPlaceholder: {
+    height: 160,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#e8e8e8',
+    position: 'relative',
+  },
+  filterMapImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.7,
+  },
+  filterMapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(232,232,232,0.6)',
+  },
+  filterMapPlaceholderText: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#53587a',
+    fontWeight: '500',
+  },
+  filterApplyBtn: {
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#8bc83f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  filterApplyText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
 });
