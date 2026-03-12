@@ -25,6 +25,7 @@ export function WishlistScreen({
   onNavigateToHome,
   onNavigateToSearch,
   onNavigateToPropertyDetail,
+  onNavigateToProfile,
 }: {
   favoriteIds: string[];
   onToggleFavorite: (id: string) => void;
@@ -32,6 +33,7 @@ export function WishlistScreen({
   onNavigateToHome: () => void;
   onNavigateToSearch: () => void;
   onNavigateToPropertyDetail?: (id: string) => void;
+  onNavigateToProfile?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const paddingBottom = insets?.bottom ?? 0;
@@ -144,7 +146,7 @@ export function WishlistScreen({
             <Heart size={24} color="#8bc83f" style={styles.icon24} />
             <View style={styles.tabDot} />
           </Pressable>
-          <Pressable style={styles.tab}>
+          <Pressable style={styles.tab} onPress={onNavigateToProfile}>
             <User size={24} color="#252b5c" style={styles.icon24} />
           </Pressable>
         </View>

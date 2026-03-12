@@ -309,12 +309,14 @@ export function HomeScreen({
   onNavigateToSearch,
   onNavigateToWishlist,
   onNavigateToPropertyDetail,
+  onNavigateToProfile,
 }: {
   favoriteIds: string[];
   onToggleFavorite: (id: string) => void;
   onNavigateToSearch?: () => void;
   onNavigateToWishlist?: () => void;
   onNavigateToPropertyDetail?: (id: string) => void;
+  onNavigateToProfile?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState(0);
@@ -444,7 +446,7 @@ export function HomeScreen({
           <Pressable style={styles.tab} onPress={onNavigateToWishlist}>
             <Heart size={24} color="#252b5c" style={styles.icon24} />
           </Pressable>
-          <Pressable style={styles.tab}>
+          <Pressable style={styles.tab} onPress={onNavigateToProfile}>
             <User size={24} color="#252b5c" style={styles.icon24} />
           </Pressable>
         </View>

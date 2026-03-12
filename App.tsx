@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { PropertyDetailScreen } from './src/screens/PropertyDetailScreen';
+import { ProfileScreen } from './src/screens/ProfileScreen';
 import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { WishlistScreen } from './src/screens/WishlistScreen';
@@ -22,7 +23,7 @@ const INITIAL_METRICS = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-type AppScreen = 'splash' | 'home' | 'search' | 'wishlist' | 'property-detail';
+type AppScreen = 'splash' | 'home' | 'search' | 'wishlist' | 'property-detail' | 'profile';
 
 // Initial favorites matching PROPERTIES that have isFavorite: true
 const INITIAL_FAVORITE_IDS = ['1', '6', '8', '11', '15', '18', '21', '24'];
@@ -74,6 +75,7 @@ function AppContent({
         onNavigateToHome={() => setScreen('home')}
         onNavigateToWishlist={() => setScreen('wishlist')}
         onNavigateToPropertyDetail={navigateToPropertyDetail}
+        onNavigateToProfile={() => setScreen('profile')}
       />
     );
   }
@@ -86,6 +88,18 @@ function AppContent({
         onNavigateToHome={() => setScreen('home')}
         onNavigateToSearch={() => setScreen('search')}
         onNavigateToPropertyDetail={navigateToPropertyDetail}
+        onNavigateToProfile={() => setScreen('profile')}
+      />
+    );
+  }
+  if (screen === 'profile') {
+    return (
+      <ProfileScreen
+        favoriteIds={favoriteIds}
+        onBack={() => setScreen('home')}
+        onNavigateToHome={() => setScreen('home')}
+        onNavigateToSearch={() => setScreen('search')}
+        onNavigateToWishlist={() => setScreen('wishlist')}
       />
     );
   }
@@ -96,6 +110,7 @@ function AppContent({
       onNavigateToSearch={() => setScreen('search')}
       onNavigateToWishlist={() => setScreen('wishlist')}
       onNavigateToPropertyDetail={navigateToPropertyDetail}
+      onNavigateToProfile={() => setScreen('profile')}
     />
   );
 }
