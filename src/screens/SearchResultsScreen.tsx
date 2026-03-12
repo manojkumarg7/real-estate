@@ -269,7 +269,7 @@ export function SearchResultsScreen({
                         }}
                       >
                         <Image
-                          source={require('../assets/estate-img-1.png')}
+                          source={require('../assets/map.jpg')}
                           style={styles.filterMapImage}
                           resizeMode="cover"
                         />
