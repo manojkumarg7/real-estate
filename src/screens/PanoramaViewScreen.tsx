@@ -177,11 +177,15 @@ export function PanoramaViewScreen({
           </View>
         </Pressable>
       </View>
-      {/* Room label (like reference) */}
+      {/* Room label – above the card so they don't overlap */}
       <View
         style={[
           styles.roomLabelWrap,
-          { bottom: paddingBottom + (property ? 100 : 24) },
+          {
+            bottom: property
+              ? paddingBottom + 16 + 72 + 12 + 12 + 8
+              : paddingBottom + 24,
+          },
         ]}
       >
         <Text style={styles.roomLabel}>Living Room</Text>
