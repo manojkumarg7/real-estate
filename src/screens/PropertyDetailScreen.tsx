@@ -60,6 +60,7 @@ export function PropertyDetailScreen({
   onBack,
   onNavigateToPropertyDetail,
   onNavigateToMap,
+  onNavigateToPanorama,
 }: {
   propertyId: string;
   favoriteIds: string[];
@@ -67,6 +68,7 @@ export function PropertyDetailScreen({
   onBack: () => void;
   onNavigateToPropertyDetail?: (id: string) => void;
   onNavigateToMap?: () => void;
+  onNavigateToPanorama?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const property = PROPERTIES.find(p => p.id === propertyId);
@@ -156,12 +158,17 @@ export function PropertyDetailScreen({
             <Pressable style={styles.rentButton}>
               <Text style={styles.rentButtonText}>Rent</Text>
             </Pressable>
-            <Pressable style={styles.outlineButton}>
+            <Pressable
+              style={styles.outlineButton}
+              onPress={() => onNavigateToPanorama?.()}
+            >
               <Text style={styles.outlineButtonText}>Buy</Text>
             </Pressable>
-            <Pressable style={styles.sqftButton}>
-              <LayoutGrid size={16} color="#53587a" />
-              <Text style={styles.sqftButtonText}>{extras.sqft} sqft</Text>
+            <Pressable
+              style={styles.sqftButton}
+              onPress={() => onNavigateToPanorama?.()}
+            >
+              <Text style={styles.sqftButtonText}>360</Text>
             </Pressable>
           </View>
         </View>

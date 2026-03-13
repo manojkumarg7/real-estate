@@ -16,6 +16,7 @@ import { ProfileScreen } from './src/screens/ProfileScreen';
 import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { WishlistScreen } from './src/screens/WishlistScreen';
+import { PanoramaViewScreen } from './src/screens/PanoramaViewScreen';
 
 // Lazy-load MapScreen so MapLibre is only loaded when user opens the map (avoids console errors on app start when native module is not linked)
 const MapScreen = React.lazy(() =>
@@ -29,7 +30,7 @@ const INITIAL_METRICS = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-type AppScreen = 'splash' | 'home' | 'search' | 'map' | 'wishlist' | 'property-detail' | 'profile';
+type AppScreen = 'splash' | 'home' | 'search' | 'map' | 'panorama' | 'wishlist' | 'property-detail' | 'profile';
 
 // Bangalore center [lng, lat] for map marker when opening from property detail (property data has no coords yet)
 const BANGALORE_CENTER: [number, number] = [77.5946, 12.9716];
@@ -80,6 +81,15 @@ function AppContent({
           setMapReturnScreen('property-detail');
           setScreen('map');
         }}
+        onNavigateToPanorama={() => setScreen('panorama')}
+      />
+    );
+  }
+  if (screen === 'panorama') {
+    return (
+      <PanoramaViewScreen
+        propertyId={selectedPropertyId}
+        onBack={() => setScreen('property-detail')}
       />
     );
   }
