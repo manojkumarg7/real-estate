@@ -35,8 +35,6 @@ export function SplashScreen({ onLetsStart }: SplashScreenProps) {
         <RadialGradientOverlay
           width={SCREEN_WIDTH}
           height={SCREEN_HEIGHT}
-          centerOpacity={0}
-          edgeOpacity={0.5}
           color="#1F4C6B"
         />
       </View>
