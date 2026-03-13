@@ -1,10 +1,17 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { RadialGradientOverlay } from '../components/RadialGradientOverlay';
 
-// Radial gradient layer: radial-gradient(746.5% 129.57% at 50% 100%, rgba(33, 98, 138, 0) 5.19%, #1F4C6B 56.53%)
+// Use 'screen' so the background covers the entire display (including status bar area)
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 type SplashScreenProps = {
   onLetsStart: () => void;
@@ -16,29 +23,41 @@ export function SplashScreen({ onLetsStart }: SplashScreenProps) {
   const paddingBottom = insets?.bottom ?? 0;
 
   return (
-    <View style={[styles.container, { paddingTop, paddingBottom }]}>
-      {/* Base background color (matches Figma bg) */}
-      <View style={[StyleSheet.absoluteFill, styles.baseBg]} />
-
-      {/* Radial gradient layer from bottom: transparent 5.19% → #1F4C6B 56.53% */}
-      <RadialGradientOverlay />
-
-      {/* Centered content: logo + title */}
-      <View style={styles.centered}>
+    <View style={styles.container}>
+      {/* Full-screen background layer: no safe area, covers entire screen */}
+      <View style={[styles.backgroundLayer, { width: SCREEN_WIDTH, height: SCREEN_HEIGHT }]}>
         <Image
-          source={require('../assets/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-          accessibilityLabel="Rise Real Estate logo"
+          source={require('../assets/splash-bg.png')}
+          style={styles.splashBgImage}
+          resizeMode="cover"
+          accessibilityLabel="Splash background"
         />
-        <Text style={styles.titleRise}>Rise</Text>
-        <Text style={styles.titleRealEstate}>Real Estate</Text>
+        <RadialGradientOverlay
+          width={SCREEN_WIDTH}
+          height={SCREEN_HEIGHT}
+          centerOpacity={0}
+          edgeOpacity={0.5}
+          color="#1F4C6B"
+        />
       </View>
 
-      {/* Bottom: CTA button + version */}
-      <View style={styles.bottom}>
-        <Button title="let's start" onPress={onLetsStart} />
-        <Text style={styles.version}>v.1.0</Text>
+      {/* Content: safe area padding, center-aligned and responsive */}
+      <View style={[styles.content, { paddingTop, paddingBottom }]}>
+        <View style={styles.centered}>
+          <Image
+            source={require('../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="Rise Real Estate logo"
+          />
+          <Text style={styles.titleRise}>Rise</Text>
+          <Text style={styles.titleRealEstate}>Real Estate</Text>
+        </View>
+
+        <View style={styles.bottom}>
+          <Button title="let's start" onPress={onLetsStart} />
+          <Text style={styles.version}>v.1.0</Text>
+        </View>
       </View>
     </View>
   );
@@ -49,18 +68,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#234f68',
   },
-  baseBg: {
-    backgroundColor: '#234f68',
+  backgroundLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    overflow: 'hidden',
+  },
+  splashBgImage: {
+    width: '100%',
+    height: '100%',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
   },
   logo: {
     width: 172,
     height: 155,
+    maxWidth: '70%',
     marginBottom: 16,
   },
   titleRise: {
